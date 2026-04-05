@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/server"
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from("sincre_responses")
+      // @ts-ignore - Supabase types will be generated after first deploy
       .select("*")
       .order("created_at", { ascending: false })
 
@@ -40,10 +41,11 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase
       .from("sincre_responses")
+      // @ts-ignore - Supabase types will be generated after first deploy
       .delete()
       .eq("id", id)
 

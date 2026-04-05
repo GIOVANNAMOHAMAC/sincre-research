@@ -201,6 +201,62 @@ export interface Database {
           created_at: string
         }
       }
+      sincre_responses: {
+        Row: {
+          id: string
+          created_at: string
+          name: string | null
+          company: string | null
+          proximo_distante: number
+          conservador_inovador: number
+          serio_descontraido: number
+          humano_tecnico: number
+          complexo_simples: number
+          feminino_masculino: number
+          leve_pesado: number
+          agressivo_amigavel: number
+          popular_elitizado: number
+          moderno_tradicional: number
+          animado_tranquilo: number
+          comum_diferente: number
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          name?: string | null
+          company?: string | null
+          proximo_distante: number
+          conservador_inovador: number
+          serio_descontraido: number
+          humano_tecnico: number
+          complexo_simples: number
+          feminino_masculino: number
+          leve_pesado: number
+          agressivo_amigavel: number
+          popular_elitizado: number
+          moderno_tradicional: number
+          animado_tranquilo: number
+          comum_diferente: number
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          name?: string | null
+          company?: string | null
+          proximo_distante?: number
+          conservador_inovador?: number
+          serio_descontraido?: number
+          humano_tecnico?: number
+          complexo_simples?: number
+          feminino_masculino?: number
+          leve_pesado?: number
+          agressivo_amigavel?: number
+          popular_elitizado?: number
+          moderno_tradicional?: number
+          animado_tranquilo?: number
+          comum_diferente?: number
+        }
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/server"
+import type { Database } from "@/types/supabase"
+
+type SincreResponseInsert = Database['public']['Tables']['sincre_responses']['Insert']
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,26 +33,29 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
+
+    const insertData: SincreResponseInsert = {
+      name: body.name || null,
+      company: body.company || null,
+      proximo_distante: body.proximo_distante,
+      conservador_inovador: body.conservador_inovador,
+      serio_descontraido: body.serio_descontraido,
+      humano_tecnico: body.humano_tecnico,
+      complexo_simples: body.complexo_simples,
+      feminino_masculino: body.feminino_masculino,
+      leve_pesado: body.leve_pesado,
+      agressivo_amigavel: body.agressivo_amigavel,
+      popular_elitizado: body.popular_elitizado,
+      moderno_tradicional: body.moderno_tradicional,
+      animado_tranquilo: body.animado_tranquilo,
+      comum_diferente: body.comum_diferente,
+    }
 
     const { data, error } = await supabase
       .from("sincre_responses")
-      .insert({
-        name: body.name || null,
-        company: body.company || null,
-        proximo_distante: body.proximo_distante,
-        conservador_inovador: body.conservador_inovador,
-        serio_descontraido: body.serio_descontraido,
-        humano_tecnico: body.humano_tecnico,
-        complexo_simples: body.complexo_simples,
-        feminino_masculino: body.feminino_masculino,
-        leve_pesado: body.leve_pesado,
-        agressivo_amigavel: body.agressivo_amigavel,
-        popular_elitizado: body.popular_elitizado,
-        moderno_tradicional: body.moderno_tradicional,
-        animado_tranquilo: body.animado_tranquilo,
-        comum_diferente: body.comum_diferente,
-      })
+      // @ts-ignore - Supabase types will be generated after first deploy
+      .insert(insertData)
       .select()
       .single()
 
