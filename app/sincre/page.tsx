@@ -77,10 +77,10 @@ export default function SincrePage() {
       if (response.ok) {
         setIsSubmitted(true)
       } else {
-        alert("Erro ao enviar respostas. Tenta novamente.")
+        alert("Erro ao enviar respostas. Tente novamente.")
       }
     } catch (error) {
-      alert("Erro ao enviar respostas. Tenta novamente.")
+      alert("Erro ao enviar respostas. Tente novamente.")
     } finally {
       setIsSubmitting(false)
     }
@@ -95,10 +95,10 @@ export default function SincrePage() {
               SINCRE
             </h1>
             <p className="text-xl text-[#1A1714]/70 mb-8">
-              Obrigado pela tua participação!
+              Obrigado pela sua participação!
             </p>
             <p className="text-[#1A1714]/60">
-              As tuas respostas foram registadas com sucesso.
+              Suas respostas foram registradas com sucesso.
             </p>
           </div>
         </div>
@@ -118,13 +118,43 @@ export default function SincrePage() {
             <h2 className="text-2xl md:text-3xl mb-8 text-[#D85A30] font-light">
               Pesquisa de Personalidade de Marca
             </h2>
-            <div className="max-w-2xl mx-auto">
+
+            {/* Texto introdutório */}
+            <div className="max-w-2xl mx-auto mb-12">
               <p className="text-lg leading-relaxed text-[#1A1714]/80">
-                O nome SINCRE vem de <em>sincretismo</em> — do grego <em>sygkretismós</em>,
-                que significava a reunião dos povos de Creta em torno de um objetivo comum.
+                Este questionário faz parte do nosso processo de pesquisa.
+                Não existem respostas certas ou erradas — queremos entender
+                como você percebe a nossa marca de forma intuitiva e honesta.
+                Leve o tempo que precisar.
               </p>
-              <p className="text-lg leading-relaxed text-[#1A1714]/80 mt-4">
-                Acreditamos que design não apaga identidades, ele as enaltece.
+            </div>
+
+            {/* Separador */}
+            <div className="w-16 h-px bg-[#D85A30] mx-auto my-12"></div>
+
+            {/* Sobre o estúdio */}
+            <div className="max-w-2xl mx-auto text-left space-y-4">
+              <p className="text-base leading-relaxed text-[#1A1714]/80">
+                O SINCRE é um estúdio de design de marca e identidade visual.
+                Acreditamos que cada marca carrega uma essência única — e o nosso
+                trabalho é traduzi-la visualmente, sem apagar culturas, mas enaltecendo-as.
+              </p>
+              <p className="text-base leading-relaxed text-[#1A1714]/80">
+                O nome SINCRE vem de <em>sincretismo</em> — do grego <em>sygkretismós</em>,
+                que significava originalmente a reunião dos povos de Creta
+                em torno de um objetivo comum: unir forças diferentes em prol de um objetivo.
+              </p>
+              <p className="text-base leading-relaxed text-[#1A1714]/80">
+                Pesquisamos a fundo os pontos de dor de cada cliente,
+                os desafios do seu mercado e segmento, e também os seus pontos fortes
+                — porque é da soma de tudo isso que nasce uma proposta verdadeira.
+              </p>
+              <p className="text-base leading-relaxed text-[#1A1714]/80">
+                Nossa missão é mudança. Nossa missão é melhoria.
+                Somos parceiras, trabalhando em conjunto com o nosso cliente,
+                falando a mesma língua.
+              </p>
+              <p className="text-base leading-relaxed text-[#1A1714]/80 font-medium">
                 Aproximamos. Conectamos. Harmonizamos.
               </p>
             </div>
@@ -136,27 +166,27 @@ export default function SincrePage() {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-[#1A1714]/70 mb-2">
-                  Nome (opcional)
+                  Seu nome (opcional)
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-3 rounded-lg border border-[#1A1714]/20 bg-white text-[#1A1714] focus:outline-none focus:ring-2 focus:ring-[#D85A30]/50"
-                  placeholder="O teu nome"
+                  placeholder="Seu nome"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-[#1A1714]/70 mb-2">
-                  Empresa / Contexto (opcional)
+                  Sua empresa (opcional)
                 </label>
                 <input
                   type="text"
                   value={formData.company}
                   onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                   className="w-full px-4 py-3 rounded-lg border border-[#1A1714]/20 bg-white text-[#1A1714] focus:outline-none focus:ring-2 focus:ring-[#D85A30]/50"
-                  placeholder="A tua empresa ou contexto"
+                  placeholder="Sua empresa ou contexto"
                 />
               </div>
             </div>
@@ -164,7 +194,7 @@ export default function SincrePage() {
             {/* Slider attributes */}
             <div className="space-y-10">
               <h3 className="text-xl font-medium text-[#1A1714] mb-6">
-                Como percebes a personalidade do SINCRE?
+                Como você percebe a personalidade do SINCRE?
               </h3>
 
               {attributes.map((attr) => (
@@ -207,7 +237,7 @@ export default function SincrePage() {
                 disabled={isSubmitting}
                 className="w-full bg-[#D85A30] text-white py-4 rounded-lg font-medium text-lg hover:bg-[#D85A30]/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? "A enviar..." : "Enviar respostas"}
+                {isSubmitting ? "Enviando..." : "Enviar respostas"}
               </button>
             </div>
           </form>
