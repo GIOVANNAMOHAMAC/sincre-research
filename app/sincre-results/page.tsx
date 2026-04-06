@@ -16,6 +16,9 @@ import {
   PolarRadiusAxis,
   Radar,
   Legend,
+  ScatterChart,
+  Scatter,
+  ZAxis,
 } from "recharts"
 
 const dmSans = DM_Sans({ subsets: ["latin"] })
@@ -38,6 +41,7 @@ type Response = {
   moderno_tradicional: number
   animado_tranquilo: number
   comum_diferente: number
+  tempo_resposta_segundos: number | null
 }
 
 const attributes = [
@@ -62,6 +66,20 @@ const getLabel = (value: number, left: string, right: string) => {
   if (value === 4) return `Um pouco ${right}`
   if (value === 5) return `Muito ${right}`
   return "N/A"
+}
+
+const formatTempo = (segundos: number | null) => {
+  if (!segundos) return "N/A"
+  const mins = Math.floor(segundos / 60)
+  const secs = segundos % 60
+  return mins > 0 ? `${mins}min ${secs}s` : `${secs}s`
+}
+
+const getTempoCategoria = (segundos: number | null) => {
+  if (!segundos) return { label: "N/A", color: "text-gray-500" }
+  if (segundos < 60) return { label: "Resposta rápida", color: "text-yellow-600" }
+  if (segundos <= 180) return { label: "Resposta reflexiva", color: "text-green-600" }
+  return { label: "Resposta detalhada", color: "text-blue-600" }
 }
 
 export default function SincreResultsPage() {
@@ -133,6 +151,9 @@ export default function SincreResultsPage() {
       "Data",
       "Nome",
       "Empresa",
+      "Tempo (segundos)",
+      "Tempo (formatado)",
+      "Categoria Tempo",
       ...attributes.map((a) => `${a.left}/${a.right}`),
     ]
 
@@ -141,6 +162,9 @@ export default function SincreResultsPage() {
       new Date(r.created_at).toLocaleString("pt-PT"),
       r.name || "",
       r.company || "",
+      r.tempo_resposta_segundos || "",
+      formatTempo(r.tempo_resposta_segundos),
+      getTempoCategoria(r.tempo_resposta_segundos).label,
       ...attributes.map((a) => r[a.key as keyof Response]),
     ])
 
@@ -243,6 +267,32 @@ export default function SincreResultsPage() {
   const firstResponse = responses.length > 0 ? responses[responses.length - 1] : null
   const lastResponse = responses.length > 0 ? responses[0] : null
 
+  // Cálculos de tempo de resposta
+  const responsesComTempo = responses.filter(r => r.tempo_resposta_segundos !== null)
+  const tempoMedio = responsesComTempo.length > 0
+    ? Math.round(responsesComTempo.reduce((acc, r) => acc + (r.tempo_resposta_segundos || 0), 0) / responsesComTempo.length)
+    : 0
+  const tempoMin = responsesComTempo.length > 0
+    ? Math.min(...responsesComTempo.map(r => r.tempo_resposta_segundos || 0))
+    : 0
+  const tempoMax = responsesComTempo.length > 0
+    ? Math.max(...responsesComTempo.map(r => r.tempo_resposta_segundos || 0))
+    : 0
+
+  // Dados para scatter plot: tempo x média dos atributos
+  const scatterData = responses
+    .filter(r => r.tempo_resposta_segundos !== null)
+    .map(r => {
+      const mediaAtributos = attributes.reduce((acc, attr) =>
+        acc + (r[attr.key as keyof Response] as number), 0
+      ) / attributes.length
+      return {
+        tempo: r.tempo_resposta_segundos,
+        media: mediaAtributos,
+        name: r.name || 'Anônimo'
+      }
+    })
+
   return (
     <div className={`min-h-screen bg-[#FAF8F4] ${dmSans.className}`}>
       <div className="container mx-auto px-4 py-12">
@@ -277,6 +327,24 @@ export default function SincreResultsPage() {
             </div>
           </div>
 
+          {/* Time Metrics */}
+          {responsesComTempo.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="bg-white p-6 rounded-lg border border-[#D85A30]/20">
+                <p className="text-sm text-[#1A1714]/60 mb-1">Tempo médio de resposta</p>
+                <p className="text-3xl font-bold text-[#D85A30]">{formatTempo(tempoMedio)}</p>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-[#D85A30]/20">
+                <p className="text-sm text-[#1A1714]/60 mb-1">Tempo mínimo</p>
+                <p className="text-lg text-[#1A1714]">{formatTempo(tempoMin)}</p>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-[#D85A30]/20">
+                <p className="text-sm text-[#1A1714]/60 mb-1">Tempo máximo</p>
+                <p className="text-lg text-[#1A1714]">{formatTempo(tempoMax)}</p>
+              </div>
+            </div>
+          )}
+
           <button
             onClick={exportCSV}
             className="bg-[#D85A30] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#D85A30]/90 transition"
@@ -308,6 +376,54 @@ export default function SincreResultsPage() {
                 />
                 <Legend />
               </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Scatter Plot - Tempo x Média dos Atributos */}
+        {scatterData.length > 0 && (
+          <div className="mb-12 bg-white p-8 rounded-lg border border-[#1A1714]/10">
+            <h3 className="text-2xl font-bold text-[#1A1714] mb-6">
+              Tempo de Resposta x Média dos Atributos
+            </h3>
+            <p className="text-sm text-[#1A1714]/60 mb-4">
+              Este gráfico mostra se existe correlação entre o tempo que a pessoa
+              levou para responder e as respostas que deu (mais neutras ou mais extremas).
+            </p>
+            <ResponsiveContainer width="100%" height={400}>
+              <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                <XAxis
+                  type="number"
+                  dataKey="tempo"
+                  name="Tempo (s)"
+                  label={{ value: 'Tempo de Resposta (segundos)', position: 'insideBottom', offset: -10 }}
+                />
+                <YAxis
+                  type="number"
+                  dataKey="media"
+                  name="Média"
+                  domain={[1, 5]}
+                  label={{ value: 'Média dos Atributos', angle: -90, position: 'insideLeft' }}
+                />
+                <Tooltip
+                  cursor={{ strokeDasharray: '3 3' }}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload
+                      return (
+                        <div className="bg-white p-3 border border-[#1A1714]/20 rounded shadow-lg">
+                          <p className="font-medium">{data.name}</p>
+                          <p className="text-sm">Tempo: {formatTempo(data.tempo)}</p>
+                          <p className="text-sm">Média: {data.media.toFixed(2)}</p>
+                        </div>
+                      )
+                    }
+                    return null
+                  }}
+                />
+                <Scatter name="Respostas" data={scatterData} fill="#D85A30" />
+              </ScatterChart>
             </ResponsiveContainer>
           </div>
         )}
@@ -363,6 +479,7 @@ export default function SincreResultsPage() {
                   <th className="px-4 py-3 text-left">Data</th>
                   <th className="px-4 py-3 text-left">Nome</th>
                   <th className="px-4 py-3 text-left">Empresa</th>
+                  <th className="px-4 py-3 text-left">Tempo</th>
                   {attributes.map((attr) => (
                     <th key={attr.key} className="px-4 py-3 text-center">
                       {attr.left}/{attr.right}
@@ -372,31 +489,40 @@ export default function SincreResultsPage() {
                 </tr>
               </thead>
               <tbody>
-                {responses.map((response) => (
-                  <tr
-                    key={response.id}
-                    className="border-t border-[#1A1714]/10 hover:bg-[#1A1714]/5"
-                  >
-                    <td className="px-4 py-3">
-                      {new Date(response.created_at).toLocaleDateString("pt-PT")}
-                    </td>
-                    <td className="px-4 py-3">{response.name || "—"}</td>
-                    <td className="px-4 py-3">{response.company || "—"}</td>
-                    {attributes.map((attr) => (
-                      <td key={attr.key} className="px-4 py-3 text-center">
-                        {response[attr.key as keyof Response]}
+                {responses.map((response) => {
+                  const tempoCategoria = getTempoCategoria(response.tempo_resposta_segundos)
+                  return (
+                    <tr
+                      key={response.id}
+                      className="border-t border-[#1A1714]/10 hover:bg-[#1A1714]/5"
+                    >
+                      <td className="px-4 py-3">
+                        {new Date(response.created_at).toLocaleDateString("pt-PT")}
                       </td>
-                    ))}
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => handleDelete(response.id)}
-                        className="text-red-600 hover:text-red-800 text-xs"
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      <td className="px-4 py-3">{response.name || "—"}</td>
+                      <td className="px-4 py-3">{response.company || "—"}</td>
+                      <td className="px-4 py-3">
+                        <div>
+                          <p className="font-medium">{formatTempo(response.tempo_resposta_segundos)}</p>
+                          <p className={`text-xs ${tempoCategoria.color}`}>{tempoCategoria.label}</p>
+                        </div>
+                      </td>
+                      {attributes.map((attr) => (
+                        <td key={attr.key} className="px-4 py-3 text-center">
+                          {response[attr.key as keyof Response]}
+                        </td>
+                      ))}
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          onClick={() => handleDelete(response.id)}
+                          className="text-red-600 hover:text-red-800 text-xs"
+                        >
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

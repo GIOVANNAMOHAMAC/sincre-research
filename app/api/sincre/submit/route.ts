@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
       moderno_tradicional: body.moderno_tradicional,
       animado_tranquilo: body.animado_tranquilo,
       comum_diferente: body.comum_diferente,
+      tempo_resposta_segundos: body.tempo_resposta_segundos || null,
     }
 
     const { data, error } = await supabase

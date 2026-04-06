@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { DM_Sans, DM_Serif_Display } from "next/font/google"
 
 const dmSans = DM_Sans({ subsets: ["latin"] })
@@ -21,6 +21,7 @@ type FormData = {
   moderno_tradicional: number
   animado_tranquilo: number
   comum_diferente: number
+  tempo_resposta_segundos: number
 }
 
 const attributes = [
@@ -54,10 +55,17 @@ export default function SincrePage() {
     moderno_tradicional: 3,
     animado_tranquilo: 3,
     comum_diferente: 3,
+    tempo_resposta_segundos: 0,
   })
 
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const startTimeRef = useRef<number>(Date.now())
+
+  // Cronômetro invisível - começa quando a página carrega
+  useEffect(() => {
+    startTimeRef.current = Date.now()
+  }, [])
 
   const handleSliderChange = (key: string, value: number) => {
     setFormData((prev) => ({ ...prev, [key]: value }))
@@ -67,11 +75,20 @@ export default function SincrePage() {
     e.preventDefault()
     setIsSubmitting(true)
 
+    // Calcula tempo de resposta em segundos
+    const endTime = Date.now()
+    const tempoSegundos = Math.round((endTime - startTimeRef.current) / 1000)
+
+    const dataToSubmit = {
+      ...formData,
+      tempo_resposta_segundos: tempoSegundos,
+    }
+
     try {
       const response = await fetch("/api/sincre/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSubmit),
       })
 
       if (response.ok) {

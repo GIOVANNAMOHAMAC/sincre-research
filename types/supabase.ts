@@ -219,6 +219,7 @@ export interface Database {
           moderno_tradicional: number
           animado_tranquilo: number
           comum_diferente: number
+          tempo_resposta_segundos: number | null
         }
         Insert: {
           id?: string
@@ -237,6 +238,7 @@ export interface Database {
           moderno_tradicional: number
           animado_tranquilo: number
           comum_diferente: number
+          tempo_resposta_segundos?: number | null
         }
         Update: {
           id?: string
@@ -255,6 +257,7 @@ export interface Database {
           moderno_tradicional?: number
           animado_tranquilo?: number
           comum_diferente?: number
+          tempo_resposta_segundos?: number | null
         }
       }
     }
